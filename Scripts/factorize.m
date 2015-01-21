@@ -1,4 +1,9 @@
-[uid, mid, rating, timestamp] = textread('../Dataset/ml-100k/u.data', "%d%d%d%d", "delimiter", "\t");
+% [uid, mid, rating, timestamp] = textscan('../Dataset/ml-100k/u.data', '%d%d%d%d', 'delimiter', '\t');
+load('/Dataset/ml-100k/u.data');
+
+uid = u(:,1);
+mid = u(:,2);
+rating = u(:,3);
 
 data = [uid,mid,rating];
 
