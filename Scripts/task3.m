@@ -54,5 +54,6 @@ for i=0:numIter-1
         rating = test_set(j,3);
         p_error(j) = abs(rating - R_pred(uid,mid));
     end
+    
     avg_error(i+1) = mean(p_error);
 end
