@@ -12,6 +12,7 @@ data = [uid,mid,rating];
 disp('creating R and W matrix')
 m_weight = zeros(max(uid), max(mid));
 m_rmat = zeros(max(uid), max(mid));
+%m_rmat = nan(max(uid),max(mid));
 
 disp('populating matrix...')
 for i=1:length(data)
