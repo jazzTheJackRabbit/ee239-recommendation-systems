@@ -75,10 +75,10 @@ XfitPrevious=Inf;
 for i=1:option.iter
     switch option.distance
         case 'ls'
-            A=A.*(((W.*X)*Y')./((W.*(A*Y))*Y') + lambda*eye(size(A)) );
+            A=A.*(((W.*X)*Y')./((W.*(A*Y))*Y' + lambda*A ));
 %             A(A<eps)=0;
                 A=max(A,eps);
-            Y=Y.*((A'*(W.*X))./(A'*(W.*(A*Y))) +lambda*eye(size(Y)) );
+            Y=Y.*((A'*(W.*X))./(A'*(W.*(A*Y)) +lambda*Y ));
 %             Y(Y<eps)=0;
                 Y=max(Y,eps);
         case 'kl'
