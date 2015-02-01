@@ -17,19 +17,23 @@ W = ~iszero(R);
 
 
 option_struct = struct('iter',200,'dis',0);
-clusters = [10,50,100];
-lambda = [0.01,0.1,1];
+
 
 sqerr = inf(3,3);
-for k = clusters
-    for l = lambda
-        [U,V,~,~,~] = wnmf2(R,W,l,k,option_struct);
-        Rpred = U * V;
+i=1;
+for k = [10,50,100]
+    l=1;
+    for lambda = [0.01,0.1,1]
+        fprintf('k=%d, lambda=%f\n', k,lambda);
+        [U,V,~,~,~] = wnmf2(R,W,lambda,k,option_struct);
+        R_pred = U*V;
 
-        R(isnan(R)) = 0;    % should non entries be NaN?
-
+        %R(isnan(R)) = 0;    % should non entries be NaN?
+        
         error = R - (W.*R_pred);
         squared_error_mat = error.*error;
-        sqerr(k,l) = sum(sum(squared_error_mat));
+        sqerr(i,l) = sum(sum(squared_error_mat));
+        l=l+1;
     end
+    i=i+1;
 end
