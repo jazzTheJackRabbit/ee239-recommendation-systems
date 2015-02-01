@@ -15,8 +15,8 @@ train_len = len*(numIter-1);    % Length of the training set
 test_set = zeros(len, 3);
 
 avg_error = zeros(1,numIter);   % avg prediction error for each training/testing set
-precision = zeros(1,numIter);
-recall = zeros(1,numIter);
+%precision = zeros(1,numIter);
+%recall = zeros(1,numIter);
 
 thresholds = 1:0.2:5;
 m=0;
@@ -30,10 +30,9 @@ for i=0:numIter-1
 
 
     % Divide data into training and testing set
-    %fprintf('Training set %d\n', i);
     start = i*len+1;
     fin = start+len-1;
-    test_set = [];
+    
     test_set = data(start:fin, :);          % The testing set
     train_set = [];
     if(i > 0)
@@ -44,7 +43,6 @@ for i=0:numIter-1
     end
 
     % Build R, W matrix for the training set
-    %disp('creating R and W matrix')
     W_mat = zeros(max(uid), max(mid));
     R_mat = zeros(max(uid), max(mid));
 
@@ -59,7 +57,7 @@ for i=0:numIter-1
 
     k = 100;                                % Num of iterations
     opts = struct('iter',200,'dis',0);      % Option struct
-    [U_mat,V_mat,iters,tElps,finalResidual] = wnmfrule(R_mat,k,opts);
+    [U,V,iters,tElps,finalResidual] = wnmfrule(R_mat,k,opts);
 
 
     R_pred = U*V;                   % R prediction matrix U*V
@@ -95,7 +93,8 @@ for i=0:numIter-1
 
             p_error(j) = abs(rating - R_pred(uid,mid)); 
         end
-      
+        
+        %[precision/recall](threshold_value, iteration_number)
         precision(t,i+1) = tp/(tp+fp);
         recall(t,i+1) = tp/(tp+fn);
         
@@ -105,8 +104,4 @@ for i=0:numIter-1
         
         t = t+1;
     end
-
-%     m = m+1;
-%     prec_arr(m) = mean(precision);
-%     rec_arr(m) = mean(recall);
 end
