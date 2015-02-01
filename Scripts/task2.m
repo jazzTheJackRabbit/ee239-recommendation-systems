@@ -4,7 +4,7 @@ m_rmat = m_weight;
 m_weight = temp;
 
 for i = k
-    [U,V,numIters,tElps,finalResidual] = wnmfrule(m_rmat,i,option_struct);
+    [U,V,numIters,tElps,finalResidual] = wnmf(m_rmat,m_weight, i,option_struct);
     uv_rmat_no_weight = U * V;
     uv_rmat = m_weight.*uv_rmat_no_weight;
    
