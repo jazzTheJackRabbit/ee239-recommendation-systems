@@ -1,12 +1,10 @@
-function [A,Y,numIter,tElapsed,finalResidual]=wnmf2(X,W,lambda,k,option)
+function [A,Y,numIter,tElapsed,finalResidual]=wnmf2(X,W, lambda, k,option)
 % Weighted NMF based on multiple update rules for missing values: X=AY, s.t. A,Y>=0.
 % Definition:
 %     [A,Y,numIter,tElapsed,finalResidual]=wnmfrule(X,k)
 %     [A,Y,numIter,tElapsed,finalResidual]=wnmfrule(X,k,option)
 % X: non-negative matrix, dataset to factorize, each column is a sample,
 % and each row is a feature. A missing value is represented by NaN.
-% ================================================================
-% 
 % k: number of clusters.
 % option: struct:
 % option.distance: distance used in the objective function. It could be
@@ -61,11 +59,10 @@ else
 end
 
 % Weight
-%W=isnan(X);
-%X(W)=0;
-%W=~W;
+%X(~W)=0;
+X = X.*W;
 
-[nu,nm] = size(X);
+
 % iter: number of iterations
 [r,c]=size(X); % c is # of samples, r is # of features
 Y=rand(k,c);
@@ -76,46 +73,22 @@ A=X/Y;
 A=max(A,eps);
 XfitPrevious=Inf;
 for i=1:option.iter
-    
-    
-    for w=1:nu
-        C_u = diag(W(w,:));
-        X_u = X(w,:);
-        %size(Y)
-        %size(C_u)
-        YtCulambdaInv = Y*C_u*Y' + lambda*eye(k,k);
-      
-        YtCulambdaInv = YtCulambdaInv^-1;
-        A_u = YtCulambdaInv*Y*C_u*X_u';
-        A(w,:) = A_u';
+    switch option.distance
+        case 'ls'
+            A=A.*(((W.*X)*Y')./((W.*(A*Y))*Y') + lambda*eye(size(A)) );
+%             A(A<eps)=0;
+                A=max(A,eps);
+            Y=Y.*((A'*(W.*X))./(A'*(W.*(A*Y))) +lambda*eye(size(Y)) );
+%             Y(Y<eps)=0;
+                Y=max(Y,eps);
+        case 'kl'
+            A=(A./(W*Y')) .* ( ((W.*X)./(A*Y))*Y');
+            A=max(A,eps);
+            Y=(Y./(A'*W)) .* (A'*((W.*X)./(AY)));
+            Y=max(Y,eps);
+        otherwise
+            error('Please select the correct distance: option.distance=''ls''; or option.distance=''kl'';');
     end
-    for j=1:nm
-        C_m = diag(W(:,j));
-        X_m = X(:,j);
-        
-        AtCulambdaInv = A'*C_m*A + lambda*eye(k,k);
-        AtCulambdaInv = AtCulambdaInv^-1;
-        Y_m = AtCulambdaInv*A'*C_m*X_m;
-        Y(:,j) = Y_m;
-    end
-    
-%    switch option.distance
-%         case 'ls'
-%             A=A.*(((W.*X)*Y')./((W.*(A*Y))*Y'));
-%             % A=A.*(((W.*X)*Y')./(((W.*(A*Y))*Y')  + lambda*eye(size(A))));
-% %             A(A<eps)=0;
-%                 A=max(A,eps);
-%             Y=Y.*((A'*(W.*X))./(A'*(W.*(A*Y))));
-% %             Y(Y<eps)=0;
-%                 Y=max(Y,eps);
-%         case 'kl'
-%             A=(A./(W*Y')) .* ( ((W.*X)./(A*Y))*Y');
-%             A=max(A,eps);
-%             Y=(Y./(A'*W)) .* (A'*((W.*X)./(AY)));
-%             Y=max(Y,eps);
-%         otherwise
-%             error('Please select the correct distance: option.distance=''ls''; or option.distance=''kl'';');
-%     end
     if mod(i,10)==0 || i==option.iter
         if option.dis
             disp(['Iterating >>>>>> ', num2str(i),'th']);
