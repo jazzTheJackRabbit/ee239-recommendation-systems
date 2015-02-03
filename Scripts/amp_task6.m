@@ -82,16 +82,18 @@ for iFold=0:kFolds-1
         precision_kFold_matrix(iteration,iFold+1) = compute_precision(LDL_p,LDL_a,rated_mat);
         fprintf('The precision for fold# %d and threshold=%f is %f \n',iFold+1,threshold,precision_kFold_matrix(iteration,iFold+1))
         iteration = iteration + 1;
+        for L = [1:5]
+            LDL_a = classify(sorted_r_mat(:,1:L),threshold);
+            LDL_p = classify(sorted_uv_rmat(:,1:L),threshold);        
+            [hits,misses] = compute_hit_and_false_alarm_rates(LDL_p,LDL_a,rated_mat(:,1:L));
+            fprintf('L=%d fold=%d threshold=%f hitRate=%f falseAlarmRate=%f \n',L,iFold+1,threshold,x,y)
+            plot(misses,hits);hold on;
+        end
     end
     
-    threshold = 3
-    for L = [1:5]
-        LDL_a = classify(sorted_r_mat(:,1:L),threshold);
-        LDL_p = classify(sorted_uv_rmat(:,1:L),threshold);        
-        [x,y] = compute_hit_and_false_alarm_rates(LDL_p,LDL_a,rated_mat(:,1:L));
-        fprintf('L=%d fold=%d threshold=%f hitRate=%f falseAlarmRate=%f \n',L,iFold+1,threshold,x,y)
-    end
+%     threshold = 3
     
+figure(1);   
 end
 
 
