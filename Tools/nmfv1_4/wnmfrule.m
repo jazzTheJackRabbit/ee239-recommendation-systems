@@ -89,7 +89,7 @@ for i=1:option.iter
         otherwise
             error('Please select the correct distance: option.distance=''ls''; or option.distance=''kl'';');
     end
-    if mod(i,10)==0 || i==option.iter
+    if mod(i,100)==0 || i==option.iter
         if option.dis
             disp(['Iterating >>>>>> ', num2str(i),'th']);
         end

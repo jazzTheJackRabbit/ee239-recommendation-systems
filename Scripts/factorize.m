@@ -1,7 +1,11 @@
 % [uid, mid, rating, timestamp] = textscan('../Dataset/ml-100k/u.data', '%d%d%d%d', 'delimiter', '\t');
 
-%load('/Dataset/ml-100k/u.data');
-load('C:\Users\Brandon\Documents\GitHub\recommendationSystems\Dataset\ml-100k\u.data');
+if(computer == 'MACI64')
+    load('/Dataset/ml-100k/u.data');
+else
+    load('C:\Users\Brandon\Documents\GitHub\recommendationSystems\Dataset\ml-100k\u.data');
+end
+
 
 uid = u(:,1);
 mid = u(:,2);

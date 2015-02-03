@@ -15,7 +15,7 @@ offset = length(fullData)/kFolds;
 
 absolute_error_vector = zeros(offset,kFolds);    
 avg_abs_error_for_each_threshold = zeros(kFolds,1);
-option_struct = struct('iter',200,'dis',0);
+option_struct = struct('iter',200,'dis',1);
 
 for i=0:kFolds-1        
     start_idx = offset*i + 1;
