@@ -68,6 +68,7 @@ for iFold=0:kFolds-1
     for indx = 1:size(sorted_uv_rmat,1)
        %TODO: Check if this actually rearranges R correctly
        sorted_r_mat(indx,:) = sorted_r_mat(indx,sorted_uv_rmat_original_indices(indx,:));
+       rated_mat(indx,:) = rated_mat(indx,sorted_uv_rmat_original_indices(indx,:));
     end
 
     %Run classification for each threshold   
@@ -83,7 +84,13 @@ for iFold=0:kFolds-1
         iteration = iteration + 1;
     end
     
-    
+    threshold = 3
+    for L = [1:5]
+        LDL_a = classify(sorted_r_mat(:,1:L),threshold);
+        LDL_p = classify(sorted_uv_rmat(:,1:L),threshold);        
+        [x,y] = compute_hit_and_false_alarm_rates(LDL_p,LDL_a,rated_mat(:,1:L));
+        fprintf('L=%d fold=%d threshold=%f hitRate=%f falseAlarmRate=%f \n',L,iFold+1,threshold,x,y)
+    end
     
 end
 

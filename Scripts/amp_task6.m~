@@ -65,25 +65,31 @@ for iFold=0:kFolds-1
 
     sorted_r_mat = r_mat;
     %Sort the original r_mat to be in the same sorted order as uv_rmat
-    for indx = 1:size(uv_rmat,1)
+    for indx = 1:size(sorted_uv_rmat,1)
        %TODO: Check if this actually rearranges R correctly
        sorted_r_mat(indx,:) = sorted_r_mat(indx,sorted_uv_rmat_original_indices(indx,:));
+       rated_mat(indx,:) = rated_mat(indx,sorted_uv_rmat_original_indices(indx,:));
     end
 
     %Run classification for each threshold   
     iteration = 1;
     for threshold = [1:0.2:5]        
         %Like v/s Dislike matrix of actuals    
-        LDL_a = classify(r_mat,threshold);
+        LDL_a = classify(sorted_r_mat,threshold);
         %Like v/s Dislike matrix of predicted
-        LDL_p = classify(uv_rmat,threshold);
+        LDL_p = classify(sorted_uv_rmat,threshold);
         
         precision_kFold_matrix(iteration,iFold+1) = compute_precision(LDL_p,LDL_a,rated_mat);
-        fprintf('The precision for fold# %d and threshold=%d is %f',iFold+1,threshold,precision_kFold_matrix(iteration,iFold+1))
+        fprintf('The precision for fold# %d and threshold=%f is %f \n',iFold+1,threshold,precision_kFold_matrix(iteration,iFold+1))
         iteration = iteration + 1;
     end
     
-    
+    for L = [1:5]
+        LDL_a = classify(sorted_r_mat(:,1:L),3);
+        LDL_p = classify(sorted_uv_rmat(:,1:L),3);
+        [x,y] = compute_hit_and_false_alarm_rates(LDL_p,LDL_a,rated_mat);
+        fprintf('L= fold=%d threshold=%f hitRate=%f falseAlarmRate=%f \n',iFold+1,threshold,x,y)
+    end
     
 end
 
