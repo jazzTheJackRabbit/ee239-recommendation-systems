@@ -86,7 +86,7 @@ for iFold=0:kFolds-1
             LDL_a = classify(sorted_r_mat(:,1:L),threshold);
             LDL_p = classify(sorted_uv_rmat(:,1:L),threshold);        
             [hits,misses] = compute_hit_and_false_alarm_rates(LDL_p,LDL_a,rated_mat(:,1:L));
-            fprintf('L=%d fold=%d threshold=%f hitRate=%f falseAlarmRate=%f \n',L,iFold+1,threshold,x,y)
+            fprintf('L=%d fold=%d threshold=%f hitRate=%f falseAlarmRate=%f \n',L,iFold+1,threshold,hits,misses)
             plot(misses,hits);hold on;
         end
     end
