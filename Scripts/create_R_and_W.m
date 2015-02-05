@@ -8,8 +8,8 @@ function [r_mat,w_mat] = create_R_and_W(raw_data)
     data = raw_data(1:length(raw_data),1:3);
 
     disp('creating R and W matrix')
-    w_mat = zeros(max(data(:,1)), max(data(:,2)));
-    r_mat = zeros(max(data(:,1)), max(data(:,2)));
+    w_mat = zeros(943, 1682);
+    r_mat = zeros(943, 1682);
 
     disp('populating matrix...')
         
