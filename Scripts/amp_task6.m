@@ -27,7 +27,8 @@ for iFold=0:kFolds-1
     %Create the R and W matrix
     %TODO: w_mat and r_mat SHOULD BE interchanged here because the questions says so!
     [r_mat,w_mat] = create_R_and_W(trainData);
-       
+    
+    [eval_mat, weval_mat] = create_R_and_W(testData);
     
     %For all the uid,mid pairs in the training data, change all the weight
     %values.
@@ -53,10 +54,13 @@ for iFold=0:kFolds-1
     L = size(uv_rmat,2);
     
     sorted_r_mat = zeros(size(r_mat));
+    sorted_eval = zeros(size(uv_rmat));
     
     sorted_uv_rmat = zeros(size(uv_rmat,1),L);
     sorted_uv_rmat_original_indices = zeros(size(uv_rmat,1),L);
 
+    
+    
     for indx = 1:size(uv_rmat,1)
         [ratings,indices] = sort(uv_rmat(indx,:),'descend');
         sorted_uv_rmat(indx,:) = ratings(1:L);
@@ -68,26 +72,35 @@ for iFold=0:kFolds-1
     for indx = 1:size(sorted_uv_rmat,1)
        %TODO: Check if this actually rearranges R correctly
        sorted_r_mat(indx,:) = sorted_r_mat(indx,sorted_uv_rmat_original_indices(indx,:));
+       sorted_eval(indx,:) = sorted_eval(indx,sorted_uv_rmat_original_indices(indx,:));
+       
        rated_mat(indx,:) = rated_mat(indx,sorted_uv_rmat_original_indices(indx,:));
     end
 
     %Run classification for each threshold   
     iteration = 1;
-    for threshold = [1:0.2:5]        
+    num = 1;
+    %for threshold = [1:0.2:5]        
+    for threshold = 3
         %Like v/s Dislike matrix of actuals    
-        LDL_a = classify(sorted_r_mat,threshold);
+        %LDL_a = classify(sorted_r_mat,3);
+        LDL_a = classify(sorted_eval,3);
         %Like v/s Dislike matrix of predicted
         LDL_p = classify(sorted_uv_rmat,threshold);
         
-        precision_kFold_matrix(iteration,iFold+1) = compute_precision(LDL_p,LDL_a,rated_mat);
+        precision_kFold_matrix(iteration,iFold+1) = compute_precision(LDL_p,LDL_a,sorted_eval);
         fprintf('The precision for fold# %d and threshold=%f is %f \n',iFold+1,threshold,precision_kFold_matrix(iteration,iFold+1))
         iteration = iteration + 1;
-        for L = [1:5]
-            LDL_a = classify(sorted_r_mat(:,1:L),threshold);
+        for L = [1:100]
+            LDL_a = classify(sorted_r_mat(:,1:L),3);
             LDL_p = classify(sorted_uv_rmat(:,1:L),threshold);        
             [hits,misses] = compute_hit_and_false_alarm_rates(LDL_p,LDL_a,rated_mat(:,1:L));
             fprintf('L=%d fold=%d threshold=%f hitRate=%f falseAlarmRate=%f \n',L,iFold+1,threshold,hits,misses)
             plot(misses,hits);hold on;
+            
+            hit_arr(num) = hits;
+            miss_arr(num) = misses;
+            num = num+1;
         end
     end
     
