@@ -14,6 +14,7 @@ offset = length(fullData)/kFolds;
 option_struct = struct('iter',200,'dis',1);
 
 precision_kFold_matrix = zeros(size(1:0.2:5,2),kFolds);
+recall = zeros(size(1:0.2:5,2),kFolds);
 
 for iFold=0:kFolds-1        
     start_idx = offset*iFold + 1;
@@ -26,7 +27,7 @@ for iFold=0:kFolds-1
     
     %Create the R and W matrix
     %TODO: w_mat and r_mat SHOULD BE interchanged here because the questions says so!
-    [r_mat,w_mat] = create_R_and_W(trainData);
+    [w_mat,r_mat] = create_R_and_W(trainData);
        
     
     %For all the uid,mid pairs in the training data, change all the weight
@@ -39,15 +40,22 @@ for iFold=0:kFolds-1
     %rated_mat consists of whether the user has rated the movie or not.        
     %TODO: if r_mat and w_mat are interchanged, this should also be
     %interchanged
-    rated_mat = w_mat;
+    rated_mat = w_mat > 0;
     
     sprintf('Fold#:%d',iFold+1)
     
     %TODO: Check which lambda has best value and use that.
     lambda = 1;
     
-    [U,V,~,~,~] = wnmf2(r_mat,w_mat,lambda,100,option_struct);    
+    [U,V,~,~,~] = wnmf2(w_mat,r_mat,lambda,100,option_struct);    
+    
     uv_rmat = U * V;
+    
+    temp = r_mat;
+    r_mat = w_mat;
+    w_mat = r_mat;
+    
+    
         
     %TODO: Change this to 5?
     L = size(uv_rmat,2);
@@ -75,22 +83,24 @@ for iFold=0:kFolds-1
     iteration = 1;
     for threshold = [1:0.2:5]        
         %Like v/s Dislike matrix of actuals    
-        LDL_a = classify(sorted_r_mat,threshold);
+        LDL_a = classify(sorted_r_mat,3);
         %Like v/s Dislike matrix of predicted
         LDL_p = classify(sorted_uv_rmat,threshold);
         
-        precision_kFold_matrix(iteration,iFold+1) = compute_precision(LDL_p,LDL_a,rated_mat);
-        fprintf('The precision for fold# %d and threshold=%f is %f \n',iFold+1,threshold,precision_kFold_matrix(iteration,iFold+1))
+        [precision_kFold_matrix(iteration,iFold+1),recall(iteration,iFold+1)] = compute_precision(LDL_p,LDL_a,rated_mat);
+        fprintf('fold# %d threshold=%f precision=%f recall=%f\n',iFold+1,threshold,precision_kFold_matrix(iteration,iFold+1),recall(iteration,iFold+1))
+        
         iteration = iteration + 1;
         for L = [1:5]
             LDL_a = classify(sorted_r_mat(:,1:L),threshold);
             LDL_p = classify(sorted_uv_rmat(:,1:L),threshold);        
             [hits,misses] = compute_hit_and_false_alarm_rates(LDL_p,LDL_a,rated_mat(:,1:L));
             fprintf('L=%d fold=%d threshold=%f hitRate=%f falseAlarmRate=%f \n',L,iFold+1,threshold,hits,misses)
-            plot(misses,hits);hold on;
-        end
+            plot(misses,hits,'r+-');hold on;
+        end        
     end
     
+%     plot(recall(:,iFold),precision_kFold_matrix(:,iFold),'r*-')
 %     threshold = 3
     
 figure(1);   
